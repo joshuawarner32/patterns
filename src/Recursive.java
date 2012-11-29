@@ -27,7 +27,7 @@ public class Recursive extends Value {
     Value ret = items.get(index);
     if(ret == marker) {
       if(count > 1) {
-        return new Recursive(marker, items, terminal, count - 1);
+        return selfChild();
       } else {
         return terminal;
       }
@@ -36,7 +36,25 @@ public class Recursive extends Value {
     }
   }
 
+  public Recursive selfChild() {
+    return new Recursive(marker, items, terminal, count - 1);
+  }
+
+  @Override
   public String toString() {
     return "[rec " + marker.toString() + " : " + items.toString() + "," + terminal.toString() + " * " + count + "]";
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if(o instanceof Recursive) {
+      Recursive r = (Recursive)o;
+      return
+        count == r.count &&
+        marker == r.marker &&
+        items.equals(r.items) &&
+        terminal.equals(r.terminal);
+    }
+    throw new UnsupportedOperationException();
   }
 }

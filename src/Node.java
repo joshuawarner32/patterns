@@ -1,3 +1,4 @@
+import java.util.Arrays;
  
 public class Node extends Value {
   private final Value[] items;
@@ -32,6 +33,15 @@ public class Node extends Value {
 
     b.append(")");
     return b.toString();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if(o instanceof Node) {
+      Node n = (Node)o;
+      return Arrays.equals(items, n.items);
+    }
+    throw new UnsupportedOperationException();
   }
 
 }
