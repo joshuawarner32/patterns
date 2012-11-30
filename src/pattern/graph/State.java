@@ -13,8 +13,33 @@ class State {
 
   private Set<State> incomingReductions = new HashSet<State>();
 
-  State blazeState(Transition trans, boolean live) {
-    return null;
+  State blazeState(Transition trans) {
+    System.out.println("blazeState " + this + " " + trans);
+    State s = transitions.blazeState(trans);
+    s.incomingTransitions.putTransition(trans, this);
+    return s;
+  }
+
+  boolean isLive() {
+    return live;
+  }
+
+  boolean hasTransition(Transition t, State s) {
+    return transitions.hasTransition(t, s);
+  }
+
+  boolean hasTransitionFrom(Transition t, State s) {
+    return incomingTransitions.hasTransition(t, s);
+  }
+
+  State getTransition(Transition t) {
+    System.out.println("getTransition " + this + " " + t);
+    return transitions.getTransition(t);
+  }
+
+  State getTransitionFrom(Transition t) {
+    System.out.println("getTransitionFrom " + this + " " + t);
+    return incomingTransitions.getTransition(t);
   }
 
   void recursiveSetLive(boolean l) {
@@ -32,6 +57,7 @@ class State {
   void reduceTo(State state) {
     reduction = state;
     recursiveSetLive(true);
+    state.incomingReductions.add(this);
   }
 
 }

@@ -4,7 +4,7 @@ import pattern.Variable;
 
 abstract class Transition {
 
-  Variable var;
+  final Variable var;
 
   Transition(Variable var) {
     this.var = var;
@@ -12,4 +12,5 @@ abstract class Transition {
   
   abstract void forward(Context ctx);
   abstract void reverse(Context ctx);
+
 }

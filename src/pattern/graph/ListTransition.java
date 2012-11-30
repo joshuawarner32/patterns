@@ -1,5 +1,7 @@
 package pattern.graph;
 
+import java.util.Arrays;
+
 import pattern.Value;
 import pattern.Variable;
 import pattern.Node;
@@ -12,6 +14,10 @@ class ListTransition extends Transition {
     this.variables = variables;
   }
 
+  int arity() {
+    return variables.length;
+  }
+
   void forward(Context ctx) {
     Value v = ctx.get(var);
     if(v.isAtomic() || v.size() != variables.length) {
@@ -22,8 +28,6 @@ class ListTransition extends Transition {
     for(int i = 0; i < variables.length; i++) {
       ctx.bind(variables[i], v.get(i));
     }
-
-
   }
 
   void reverse(Context ctx) {
@@ -34,4 +38,16 @@ class ListTransition extends Transition {
     }
     ctx.bind(var, new Node(values));
   }
+
+  public boolean equals(Object o) {
+    if(!(o instanceof ListTransition)) {
+      return false;
+    }
+    ListTransition l = (ListTransition)o;
+    return var == l.var && Arrays.equals(variables, l.variables);
+  }
+
+  // public int hashCode() {
+  //   return var.hashCode() + 3 * symbol.hashCode();
+  // }
 }

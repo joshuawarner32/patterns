@@ -23,4 +23,17 @@ class SymbolTransition extends Transition {
   void reverse(Context ctx) {
     ctx.bind(var, symbol);
   }
+
+  public boolean equals(Object o) {
+    if(!(o instanceof SymbolTransition)) {
+      return false;
+    }
+    SymbolTransition t = (SymbolTransition)o;
+    return var == t.var && symbol == t.symbol;
+  }
+
+  public int hashCode() {
+    return var.hashCode() + 3 * symbol.hashCode();
+  }
+
 }
