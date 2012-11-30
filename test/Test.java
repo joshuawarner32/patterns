@@ -30,7 +30,7 @@ public class Test {
   public <T> void expectNotEqual(T a, T b) {
     if(a.equals(b)) {
       throw new ExpectedException("expected not equal:\n  " + a.toString() + "\n  " + b.toString());
-    } 
+    }
   }
     
   private Namespace ns = new Namespace();
@@ -47,6 +47,7 @@ public class Test {
   Symbol a = ns.symbol("a");
   Symbol b = ns.symbol("b");
   Symbol c = ns.symbol("c");
+  Symbol d = ns.symbol("d");
 
   public void testSymbolToString() {
     expectEqual(a.toString(), "a");
@@ -83,9 +84,27 @@ public class Test {
   public void testSimpleGraph() {
     Graph g = new Graph();
     g.putReduction(new Pattern(a), new Pattern(b));
+    g.putReduction(new Pattern(c), new Pattern(d));
     expectSame(g.reduce(b), b);
-    // expectSame(g.reduce(a), b);
-    expectSame(g.reduce(c), c);
+    expectSame(g.reduce(a), b);
+    expectSame(g.reduce(c), d);
+  }
+
+  public void testIterativeGraph() {
+    Graph g = new Graph();
+    g.putReduction(new Pattern(a), new Pattern(b));
+    g.putReduction(new Pattern(b), new Pattern(c));
+    expectSame(g.reduce(a), c);
+  }
+
+  public void testNodeGraph() {
+    Graph g = new Graph();
+    System.out.println("==============");
+    g.putReduction(new Pattern(new Node(a)), new Pattern(b));
+    expectSame(g.reduce(a), a);
+    // expectEqual(g.reduce(new Node(a)), b);
+    System.out.println("==============");
+    expectEqual(g.reduce(new Node(b)), new Node(b));
   }
 
   public static void main(String[] args) {
