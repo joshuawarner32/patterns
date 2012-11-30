@@ -1,6 +1,8 @@
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
+import pattern.*;
+
 public class Test {
 
   private static class ExpectedException extends RuntimeException {
@@ -64,7 +66,7 @@ public class Test {
     expectEqual(new Node(a, new Node()).toString(), "(a ())");
   }
 
-  Atom _ = new Atom("_");
+  Variable _ = new Variable("_");
   Recursive rec = new Recursive(_, new Node(a, _), b, 2);
 
   public void testRecursiveToString() {

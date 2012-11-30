@@ -1,3 +1,4 @@
+package pattern;
 
 public class Symbol extends Value {
 
@@ -7,6 +8,10 @@ public class Symbol extends Value {
   Symbol(Namespace namespace, String name) {
     this.namespace = namespace;
     this.name = name;
+  }
+
+  public boolean isAtomic() {
+    return true;
   }
 
   public Value format() {

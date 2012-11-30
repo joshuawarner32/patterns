@@ -1,12 +1,17 @@
+package pattern;
 
-public class Atom extends Value {
+public class Variable extends Value {
   private String name;
 
-  public Atom(String name) {
+  public Variable(String name) {
     this.name = name;
   }
 
-  public Value reduce() {
+  public boolean isAtomic() {
+    return true;
+  }
+
+  public Value format() {
     throw new UnsupportedOperationException();
   }
 

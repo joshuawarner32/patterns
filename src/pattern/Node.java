@@ -1,3 +1,5 @@
+package pattern;
+
 import java.util.Arrays;
  
 public class Node extends Value {
@@ -7,7 +9,11 @@ public class Node extends Value {
     this.items = items;
   }
 
-  public Value reduce() {
+  public boolean isAtomic() {
+    return false;
+  }
+
+  public Value format() {
     return this;
   }
 

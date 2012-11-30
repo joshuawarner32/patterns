@@ -1,14 +1,20 @@
+package pattern;
+
 public class Recursive extends Value {
-  private Atom marker;
+  private Variable marker;
   private Node items;
   private Value terminal;
   private int count;
 
-  public Recursive(Atom marker, Node items, Value terminal, int count) {
+  public Recursive(Variable marker, Node items, Value terminal, int count) {
     this.marker = marker;
     this.items = items;
     this.terminal = terminal;
     this.count = count;
+  }
+
+  public boolean isAtomic() {
+    return count == 0 && terminal.isAtomic();
   }
 
   public Value format() {

@@ -1,15 +1,17 @@
+package pattern;
+
 import java.util.List;
 import java.util.ArrayList;
 
 public class Pattern {
-  private Atom[] args;
+  private Variable[] args;
   private Value value;
 
   public Pattern(Value value) {
-    this(new Atom[0], value);
+    this(new Variable[0], value);
   }
 
-  public Pattern(Atom[] args, Value value) {
+  public Pattern(Variable[] args, Value value) {
     this.args = args;
     this.value = value;
   }
@@ -19,8 +21,8 @@ public class Pattern {
   }
 
   public Value replace(Binding binding) {
-    if(value instanceof Atom) {
-      return binding.get((Atom)value);
+    if(value instanceof Variable) {
+      return binding.get((Variable)value);
     } else {
       return value;
     }

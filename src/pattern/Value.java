@@ -1,6 +1,10 @@
+package pattern;
+
 import java.util.Iterator;
 
 public abstract class Value implements Iterable<Value> {
+
+  public abstract boolean isAtomic();
 
   public abstract int size();
   public abstract Value get(int index);

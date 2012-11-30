@@ -1,3 +1,4 @@
+package pattern;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -6,27 +7,27 @@ import java.util.ArrayList;
 
 public class Graph {
 
-  private Atom valAtom = new Atom("_val");
-  private State root = new State(new Pattern(new Atom[] {valAtom}, valAtom));
+  private Variable valVariable = new Variable("_val");
+  private State root = new State(new Pattern(new Variable[] {valVariable}, valVariable));
 
   private class Context implements Binding {
-    Map<Atom, Expr> top = new HashMap<Atom, Expr>();
+    Map<Variable, Expr> top = new HashMap<Variable, Expr>();
 
     State state = root;
 
-    void bind(Atom var, Expr val) {
+    void bind(Variable var, Expr val) {
       top.put(var, val);
     }
 
-    void unbind(Atom var) {
+    void unbind(Variable var) {
       top.remove(var);
     }
 
-    Expr getExpr(Atom var) {
+    Expr getExpr(Variable var) {
       return top.get(var);
     }
 
-    public Value get(Atom var) {
+    public Value get(Variable var) {
       return getExpr(var).toValue(this);
     }
 
@@ -54,14 +55,14 @@ public class Graph {
       if(top.size() == 0) {
         return false;
       } else {
-        Map<Atom, Expr> repl = new HashMap<Atom, Expr>();
-        for(Map.Entry<Atom, Expr> b : top.entrySet()) {
-          Atom var = b.getKey();
+        Map<Variable, Expr> repl = new HashMap<Variable, Expr>();
+        for(Map.Entry<Variable, Expr> b : top.entrySet()) {
+          Variable var = b.getKey();
           Expr e = b.getValue();
 
           if(e instanceof ConstExpr) {
             ConstExpr ce = (ConstExpr)e;
-            if(ce.val instanceof Atom) {
+            if(ce.val instanceof Variable) {
               System.out.println("we're done");
             } else if(ce.val instanceof Symbol) {
               System.out.println("sym state " + ce.val);
@@ -72,17 +73,17 @@ public class Graph {
               System.out.println("node state " + ce.val);
               State s = state;
               Node n = (Node)ce.val;
-              Atom[] atoms = new Atom[n.size()];
+              Variable[] Variables = new Variable[n.size()];
               for(int i = 0; i < n.size(); i++) {
                 Value v = n.get(i);
-                if(v instanceof Atom) {
-                  atoms[i] = (Atom)v;
+                if(v instanceof Variable) {
+                  Variables[i] = (Variable)v;
                 } else {
-                  atoms[i] = new Atom("$");
+                  Variables[i] = new Variable("$");
                 }
-                repl.put(atoms[i], new ConstExpr(v));
+                repl.put(Variables[i], new ConstExpr(v));
               }
-              s.getTransition(var).putListTranslation(atoms, state = new State(new Pattern(ce.val)));
+              s.getTransition(var).putListTranslation(Variables, state = new State(new Pattern(ce.val)));
 
             }
           } else if(e instanceof StateExpr) {
@@ -130,13 +131,13 @@ public class Graph {
 
   private static class StateExpr implements Expr {
     State state;
-    Map<Atom, Expr> bindings = new HashMap<Atom, Expr>();
+    Map<Variable, Expr> bindings = new HashMap<Variable, Expr>();
 
     StateExpr(State state) {
       this.state = state;
     }
 
-    StateExpr(State state, Atom a, Expr e) {
+    StateExpr(State state, Variable a, Expr e) {
       this.state = state;
       bindings.put(a, e);
     }
@@ -145,25 +146,55 @@ public class Graph {
       return state.pattern.replace(ctx);
     }
 
-    public void bindWith(Context ctx, Atom a, StateExpr parent) {
+    public void bindWith(Context ctx, Variable a, StateExpr parent) {
       bindWith(ctx);
     }
     
     public void bindWith(Context ctx) {
-      for(Map.Entry<Atom, Expr> b : bindings.entrySet()) {
+      for(Map.Entry<Variable, Expr> b : bindings.entrySet()) {
         b.getValue().bindWith(ctx);
         ctx.bind(b.getKey(), b.getValue());
       }
     }
   }
 
+  private static class ReverseTransition {
+    State state;
+
+    ReverseTransition(State state) {
+      this.state = state;
+    }
+  }
+
+  private static class ReverseSymbolTransition extends ReverseTransition {
+    Variable define;
+    Symbol value;
+
+    ReverseSymbolTransition(State state, Variable define, Symbol value) {
+      super(state);
+      this.define = define;
+      this.value = value;
+    }
+  }
+
+  private static class ReverseListTransition extends ReverseTransition {
+    Variable define;
+    Variable[] variables;
+
+    ReverseListTransition(State state, Variable define, Variable[] variables) {
+      super(state);
+      this.define = define;
+      this.variables = variables;
+    }
+  }
+
   private static class Transition {
     private static class ListState {
-      Atom[] atoms;
+      Variable[] Variables;
       State state;
 
-      ListState(Atom[] atoms, State state) {
-        this.atoms = atoms;
+      ListState(Variable[] Variables, State state) {
+        this.Variables = Variables;
         this.state = state;
       }
 
@@ -178,8 +209,8 @@ public class Graph {
       symbolStates.put(sym, s);
     }
 
-    void putListTranslation(Atom[] atoms, State s) {
-      listStates.put(atoms.length, new ListState(atoms, s));
+    void putListTranslation(Variable[] Variables, State s) {
+      listStates.put(Variables.length, new ListState(Variables, s));
     }
 
     State maybeTransition(Value v, Context ctx) {
@@ -194,7 +225,7 @@ public class Graph {
         ListState s = listStates.get(size);
         if(s != null) {
           for(int i = 0; i < size; i++) {
-            ctx.bind(s.atoms[i], new ConstExpr(v.get(i)));
+            ctx.bind(s.Variables[i], new ConstExpr(v.get(i)));
           }
           return s.state;
         } else {
@@ -208,13 +239,14 @@ public class Graph {
     boolean live = true;
     Pattern pattern;
     State reduction = this;
-    Map<Atom, Transition> transitions = new HashMap<Atom, Transition>();
+    List<ReverseTransition> reverseTransitions = new ArrayList<ReverseTransition>();
+    Map<Variable, Transition> transitions = new HashMap<Variable, Transition>();
 
     State(Pattern pattern) {
       this.pattern = pattern;
     }
 
-    Transition getTransition(Atom a) {
+    Transition getTransition(Variable a) {
       Transition t = transitions.get(a);
       if(t == null) {
         transitions.put(a, t = new Transition());
@@ -224,7 +256,7 @@ public class Graph {
 
     State maybeTransition(Context ctx) {
       System.out.println("maybeTransition state " + pattern.getNakedValue().toString());
-      for(Map.Entry<Atom, Transition> e : transitions.entrySet()) {
+      for(Map.Entry<Variable, Transition> e : transitions.entrySet()) {
         State s = e.getValue().maybeTransition(ctx.get(e.getKey()), ctx);
         if(s != null && s.live) {
           ctx.unbind(e.getKey());
@@ -244,7 +276,7 @@ public class Graph {
   }
 
   private State place(Pattern p, Context ctx) {
-    ctx.bind(valAtom, new ConstExpr(p.getNakedValue()));
+    ctx.bind(valVariable, new ConstExpr(p.getNakedValue()));
     ctx.step();
     return ctx.buildState();
   }
@@ -258,7 +290,7 @@ public class Graph {
   public Value reduce(Value value) {
     System.out.println("reduce");
     Context ctx = new Context();
-    ctx.bind(valAtom, new ConstExpr(value));
+    ctx.bind(valVariable, new ConstExpr(value));
     while(ctx.step()) {}
     return ctx.result();
   }

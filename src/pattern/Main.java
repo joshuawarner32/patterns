@@ -1,3 +1,4 @@
+package pattern;
 
 public class Main {
 
@@ -6,8 +7,8 @@ public class Main {
     Symbol a = ns.symbol("a");
     Symbol b = ns.symbol("b");
     System.out.println(new Node(a, b));
-    Atom atom = new Atom("_");
-    Value rec = new Recursive(atom, new Node(a, atom), b, 2);
+    Variable Variable = new Variable("_");
+    Value rec = new Recursive(Variable, new Node(a, Variable), b, 2);
     System.out.println(rec);
     System.out.println(rec.format());
     System.out.println(rec.fullFormat());
