@@ -1,39 +1,8 @@
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
+package pattern;
 
-import pattern.*;
+import static pattern.tester.Expect.*;
 
-public class Test {
-
-  private static class ExpectedException extends RuntimeException {
-    public ExpectedException(String message) {
-      super(message);
-    }
-  }
-
-  public <T> void expectSame(T a, T b) {
-    if(a != b) {
-      throw new ExpectedException("expected same:\n  " + a.toString() + "\n  " + b.toString());
-    }
-  }
-
-  public <T> void expectDifferent(T a, T b) {
-    if(a == b) {
-      throw new ExpectedException("expected different:\n  " + a.toString() + "\n  " + b.toString());
-    }
-  }
-
-  public <T> void expectEqual(T a, T b) {
-    if(!a.equals(b)) {
-      throw new ExpectedException("expected equal:\n  " + a.toString() + "\n  " + b.toString());
-    } 
-  }
-
-  public <T> void expectNotEqual(T a, T b) {
-    if(a.equals(b)) {
-      throw new ExpectedException("expected not equal:\n  " + a.toString() + "\n  " + b.toString());
-    }
-  }
+public class PatternTest {
     
   private Namespace ns = new Namespace();
 
@@ -108,24 +77,6 @@ public class Test {
     System.out.println("==============");
     expectEqual(g.reduce(new Node(b)), new Node(b));
   }
+  
 
-  public static void main(String[] args) {
-    int tests = 0;
-    int successes = 0;
-    for(Method m : Test.class.getMethods()) {
-      if(m.getName().startsWith("test")) {
-        Test t = new Test();
-        try {
-          tests++;
-          m.invoke(t);
-          successes++;
-        } catch(IllegalAccessException e) {
-          e.printStackTrace();
-        } catch (InvocationTargetException e) {
-          e.getCause().printStackTrace();
-        }
-      }
-    }
-    System.out.println("Tests: " + tests + ", Successes: " + successes + ", Failures: " + (tests - successes));
-  }
 }

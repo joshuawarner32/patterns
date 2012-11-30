@@ -21,7 +21,7 @@
   </target>
 
   <target name="test" depends="compile-test" description="run tests">
-    <java classpath="${build}/classes:${build}/test-classes" classname="Test"/>
+    <java classpath="${build}/classes:${build}/test-classes" classname="pattern.tester.Tester"/>
   </target>
 
   <target name="dist" depends="compile,test"

@@ -8,7 +8,13 @@ import pattern.Value;
 
 class Context {
 
+  private State state;
+
   private Map<Variable, Value> bindings = new HashMap<Variable, Value>();
+
+  public Context(State state) {
+    this.state = state;
+  }
   
   Value get(Variable var) {
     Value ret = bindings.get(var);
