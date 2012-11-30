@@ -21,7 +21,7 @@ public class Expect {
   }
 
   public static <T> void expectEqual(T a, T b) {
-    if((a == null && b != null) || !a.equals(b)) {
+    if((a == null && b != null) || (a != null && b == null) || (!(a == null && b == null) && !a.equals(b))) {
       throw new ExpectedException("expected equal:\n  " + String.valueOf(a) + "\n  " + String.valueOf(b));
     } 
   }

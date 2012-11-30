@@ -10,22 +10,23 @@ class Context {
 
   private State state;
 
-  private Map<Variable, Value> bindings = new HashMap<Variable, Value>();
+  private Map<Variable, Expr> bindings = new HashMap<Variable, Expr>();
 
-  public Context(State state) {
+  public Context(State state, Variable variable, Value value) {
     this.state = state;
+    bind(variable, new ValueExpr(value));
   }
   
   Value get(Variable var) {
-    Value ret = bindings.get(var);
+    Expr ret = bindings.get(var);
     if(ret == null) {
       throw new IllegalStateException();
     }
-    return ret;
+    return ret.toValue();
   }
 
-  void bind(Variable var, Value value) {
-    if(bindings.put(var, value) != null) {
+  void bind(Variable var, Expr expr) {
+    if(bindings.put(var, expr) != null) {
       throw new IllegalStateException();
     }
   }
@@ -34,5 +35,45 @@ class Context {
     if(bindings.remove(var) == null) {
       throw new IllegalStateException();
     }
+  }
+
+  private ContextExpr readyForQuestioning(Expr expr, Map.Entry<Variable, Expr> b) {
+    ContextExpr ret = expr.toContextExpr();
+    if(ret != expr) {
+      b.setValue(ret);
+    }
+    return ret;
+  }
+
+  private boolean transition() {
+    for(Map.Entry<Variable, Expr> b : bindings.entrySet()) {
+      Variable var = b.getKey();
+      Expr value = b.getValue();
+
+      TransitionsForVariable ts = state.transitionsForVariable(var);
+
+      if(ts != null) {
+        ContextExpr expr = readyForQuestioning(value, b);
+
+      }
+    }
+    return false;
+  }
+
+  private boolean step() {
+    while(transition()) {}
+    State ns = state.reduction();
+    State old = state;
+    state = ns;
+    return ns != old;
+  }
+
+  Value result(Variable var) {
+    while(step()) {}
+    while(!bindings.containsKey(var)) {
+      // TODO: walk up transition tree
+      throw new UnsupportedOperationException();
+    }
+    return get(var);
   }
 }

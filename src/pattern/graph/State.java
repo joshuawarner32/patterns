@@ -3,6 +3,8 @@ package pattern.graph;
 import java.util.Set;
 import java.util.HashSet;
 
+import pattern.Variable;
+
 class State {
   
   private boolean live = false;
@@ -24,6 +26,10 @@ class State {
     return live;
   }
 
+  State reduction() {
+    return reduction;
+  }
+
   boolean hasTransition(Transition t, State s) {
     return transitions.hasTransition(t, s);
   }
@@ -35,6 +41,15 @@ class State {
   State getTransition(Transition t) {
     System.out.println("getTransition " + this + " " + t);
     return transitions.getTransition(t);
+  }
+
+  TransitionsForVariable transitionsForVariable(Variable v) {
+    return transitions.lookupVariable(v);
+  }
+
+  void putTransition(Transition t, State s) {
+    transitions.putTransition(t, s);
+    s.incomingTransitions.putTransition(t, this);
   }
 
   State getTransitionFrom(Transition t) {
