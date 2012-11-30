@@ -46,6 +46,7 @@ public class Test {
 
   Symbol a = ns.symbol("a");
   Symbol b = ns.symbol("b");
+  Symbol c = ns.symbol("c");
 
   public void testSymbolToString() {
     expectEqual(a.toString(), "a");
@@ -71,6 +72,20 @@ public class Test {
 
   public void testRecursiveFormat() {
     expectEqual(rec.format(), new Node(a, rec.selfChild()));
+  }
+
+  public void testTrivialGraph() {
+    Graph g = new Graph();
+    expectSame(g.reduce(a), a);
+    expectEqual(g.reduce(new Node(a, b)), new Node(a, b));
+  }
+
+  public void testSimpleGraph() {
+    Graph g = new Graph();
+    g.putReduction(new Pattern(a), new Pattern(b));
+    expectSame(g.reduce(b), b);
+    // expectSame(g.reduce(a), b);
+    expectSame(g.reduce(c), c);
   }
 
   public static void main(String[] args) {
