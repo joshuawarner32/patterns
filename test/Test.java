@@ -89,11 +89,15 @@ public class Test {
   }
 
   public static void main(String[] args) {
+    int tests = 0;
+    int successes = 0;
     for(Method m : Test.class.getMethods()) {
       if(m.getName().startsWith("test")) {
         Test t = new Test();
         try {
+          tests++;
           m.invoke(t);
+          successes++;
         } catch(IllegalAccessException e) {
           e.printStackTrace();
         } catch (InvocationTargetException e) {
@@ -101,5 +105,6 @@ public class Test {
         }
       }
     }
+    System.out.println("Tests: " + tests + ", Successes: " + successes + ", Failures: " + (tests - successes));
   }
 }
