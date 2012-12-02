@@ -8,21 +8,25 @@ import pattern.Value;
 
 class Context {
 
-  private State state;
+  private State rootState;
+  private Variable rootVariable;
 
+  private State state;
   private Map<Variable, Expr> bindings = new HashMap<Variable, Expr>();
 
   public Context(State state, Variable variable, Value value) {
+    this.rootState = state;
+    this.rootVariable = variable;
     this.state = state;
-    bind(variable, new ValueExpr(value));
+    bind(variable, new Expr(value));
   }
   
-  Value get(Variable var) {
+  Expr get(Variable var) {
     Expr ret = bindings.get(var);
     if(ret == null) {
       throw new IllegalStateException();
     }
-    return ret.toValue();
+    return ret;
   }
 
   void bind(Variable var, Expr expr) {
@@ -37,24 +41,24 @@ class Context {
     }
   }
 
-  private ContextExpr readyForQuestioning(Expr expr, Map.Entry<Variable, Expr> b) {
-    ContextExpr ret = expr.toContextExpr();
-    if(ret != expr) {
-      b.setValue(ret);
-    }
-    return ret;
+  Context newChild(Value value) {
+    return new Context(rootState, rootVariable, value);
   }
 
   private boolean transition() {
     for(Map.Entry<Variable, Expr> b : bindings.entrySet()) {
       Variable var = b.getKey();
-      Expr value = b.getValue();
+      Expr expr = b.getValue();
 
       TransitionsForVariable ts = state.transitionsForVariable(var);
 
       if(ts != null) {
-        ContextExpr expr = readyForQuestioning(value, b);
-
+        expr.prepare(this);
+        State s = expr.partialReduce(this, ts);
+        if(s != state) {
+          state = s;
+          return true;
+        }
       }
     }
     return false;
@@ -68,12 +72,12 @@ class Context {
     return ns != old;
   }
 
-  Value result(Variable var) {
+  Value result() {
     while(step()) {}
-    while(!bindings.containsKey(var)) {
+    while(state != rootState) {
       // TODO: walk up transition tree
       throw new UnsupportedOperationException();
     }
-    return get(var);
+    return get(rootVariable).toValue();
   }
 }

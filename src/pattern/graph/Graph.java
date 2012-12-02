@@ -9,9 +9,8 @@ public class Graph {
   private Variable rootVariable = new Variable("_");
 
   public Value reduce(Value value) {
-    Context ctx = new Context(rootState);
-    ctx.bind(rootVariable, value);
-    return ctx.result(rootVariable);
+    Context ctx = new Context(rootState, rootVariable, value);
+    return ctx.result();
   }
 
 }

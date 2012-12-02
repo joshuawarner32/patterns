@@ -13,15 +13,17 @@ class SymbolTransition extends Transition {
   }
 
   void forward(Context ctx) {
-    Value v = ctx.get(var);
-    if(v != symbol) {
-      throw new IllegalStateException();
-    }
-    ctx.unbind(var);
+    throw new RuntimeException();
+    // Value v = ctx.get(var);
+    // if(v != symbol) {
+    //   throw new IllegalStateException();
+    // }
+    // ctx.unbind(var);
   }
 
   void reverse(Context ctx) {
-    ctx.bind(var, symbol);
+    throw new RuntimeException();
+    // ctx.bind(var, symbol);
   }
 
   public boolean equals(Object o) {
