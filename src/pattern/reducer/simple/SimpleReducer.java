@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import pattern.Value;
 import pattern.Variable;
 import pattern.Pattern;
+import pattern.Node;
 
 import pattern.reducer.Rule;
 import pattern.reducer.Reducer;
@@ -26,14 +27,27 @@ public class SimpleReducer implements Reducer {
   }
 
   private static boolean match(Pattern pat, Value value, Map<Variable, Value> context) {
-    return value == pat.getNakedValue();
+    return value.equals(pat.getNakedValue());
   }
 
   private static Value replace(Pattern pat, Map<Variable, Value> context) {
     return pat.getNakedValue();
   }
 
+  private Value reduceChildren(Value value, Map<Variable, Value> context) {
+    if(!value.isAtomic()) {
+      Value[] vs = new Value[value.size()];
+      for(int i = 0; i < value.size(); i++) {
+        vs[i] = reduce(value.get(i));
+      }
+      return new Node(vs);
+    } else {
+      return value;
+    }
+  }
+
   private Value step(Value value, Map<Variable, Value> context) {
+    value = reduceChildren(value, context);
     for(Rule r : rules) {
       if(match(r.match, value, context)) {
         Value ret = replace(r.replace, context);

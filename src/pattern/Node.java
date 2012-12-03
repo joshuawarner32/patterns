@@ -43,9 +43,15 @@ public class Node extends Value {
 
   @Override
   public boolean equals(Object o) {
-    if(o instanceof Node) {
-      Node n = (Node)o;
+    if(!(o instanceof Value)) {
+      return false;
+    }
+    Value v = (Value)o;
+    if(v instanceof Node) {
+      Node n = (Node)v;
       return Arrays.equals(items, n.items);
+    } else if(v.isAtomic()) {
+      return false;
     }
     throw new UnsupportedOperationException();
   }

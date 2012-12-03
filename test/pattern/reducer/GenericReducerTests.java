@@ -17,6 +17,7 @@ public class GenericReducerTests {
   private Namespace ns = new Namespace();
   private Symbol a = ns.symbol("a");
   private Symbol b = ns.symbol("b");
+  private Symbol c = ns.symbol("c");
 
   public GenericReducerTests(ReducerBuilder builder) {
     this.builder = builder;
@@ -31,6 +32,26 @@ public class GenericReducerTests {
     builder.add(new Rule(new Pattern(a), new Pattern(b)));
     Reducer reducer = builder.build();
     expectEqual(b, reducer.reduce(a));
+  }
+
+  public void testDoubleReduce() {
+    builder.add(new Rule(new Pattern(a), new Pattern(b)));
+    builder.add(new Rule(new Pattern(b), new Pattern(c)));
+    Reducer reducer = builder.build();
+    expectEqual(c, reducer.reduce(a));
+  }
+
+  public void testNodeReduce() {
+    builder.add(new Rule(new Pattern(new Node(a)), new Pattern(b)));
+    Reducer reducer = builder.build();
+    expectEqual(b, reducer.reduce(new Node(a)));
+  }
+
+  public void testInnerReduce() {
+    builder.add(new Rule(new Pattern(a), new Pattern(b)));
+    builder.add(new Rule(new Pattern(new Node(b)), new Pattern(c)));
+    Reducer reducer = builder.build();
+    expectEqual(reducer.reduce(new Node(a)), c);
   }
 
   public void run() {
