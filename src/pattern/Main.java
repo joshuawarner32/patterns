@@ -12,9 +12,5 @@ public class Main {
     System.out.println(rec);
     System.out.println(rec.format());
     System.out.println(rec.fullFormat());
-
-    Graph g = new Graph();
-    g.putReduction(new Pattern(a), new Pattern(b));
-    System.out.println(g.reduce(a));
   }
 }

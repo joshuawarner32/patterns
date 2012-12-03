@@ -14,6 +14,7 @@ public class Tester {
     Class[] classes = new Class[] {
       pattern.graph.GraphTest.class,
       pattern.PatternTest.class,
+      pattern.reducer.SimpleReducerTest.class
     };
 
     for(Class cls : classes) {
