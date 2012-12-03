@@ -8,6 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import pattern.Namespace;
 import pattern.Symbol;
 import pattern.Node;
+import pattern.Pattern;
 
 public class GenericReducerTests {
 
@@ -15,6 +16,7 @@ public class GenericReducerTests {
     
   private Namespace ns = new Namespace();
   private Symbol a = ns.symbol("a");
+  private Symbol b = ns.symbol("b");
 
   public GenericReducerTests(ReducerBuilder builder) {
     this.builder = builder;
@@ -23,6 +25,12 @@ public class GenericReducerTests {
   public void testTrivial() {
     Reducer reducer = builder.build();
     expectEqual(a, reducer.reduce(a));
+  }
+
+  public void testSimple() {
+    builder.add(new Rule(new Pattern(a), new Pattern(b)));
+    Reducer reducer = builder.build();
+    expectEqual(b, reducer.reduce(a));
   }
 
   public void run() {

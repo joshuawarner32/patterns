@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import pattern.Value;
 import pattern.Variable;
+import pattern.Pattern;
 
 import pattern.reducer.Rule;
 import pattern.reducer.Reducer;
@@ -24,10 +25,20 @@ public class SimpleReducer implements Reducer {
     return new Builder(rules);
   }
 
+  private static boolean match(Pattern pat, Value value, Map<Variable, Value> context) {
+    return value == pat.getNakedValue();
+  }
+
+  private static Value replace(Pattern pat, Map<Variable, Value> context) {
+    return pat.getNakedValue();
+  }
+
   private Value step(Value value, Map<Variable, Value> context) {
     for(Rule r : rules) {
-      if(r.match(value, context)) {
-        return r.replace(context);
+      if(match(r.match, value, context)) {
+        Value ret = replace(r.replace, context);
+        context.clear();
+        return ret;
       }
     }
     return value;

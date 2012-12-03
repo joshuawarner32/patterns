@@ -1,6 +1,7 @@
 package pattern;
 
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
 
 public class Pattern {
@@ -18,13 +19,5 @@ public class Pattern {
 
   public Value getNakedValue() {
     return value;
-  }
-
-  public Value replace(Binding binding) {
-    if(value instanceof Variable) {
-      return binding.get((Variable)value);
-    } else {
-      return value;
-    }
   }
 }
