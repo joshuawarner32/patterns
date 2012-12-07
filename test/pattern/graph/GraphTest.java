@@ -23,6 +23,7 @@ public class GraphTest {
     a.reduceTo(b);
     expect(a.isLive());
     expect(!b.isLive());
+    throw new RuntimeException("test");
   }
 
   public void testPutTransition() {

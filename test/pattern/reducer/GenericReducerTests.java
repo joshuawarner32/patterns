@@ -9,6 +9,7 @@ import pattern.Namespace;
 import pattern.Symbol;
 import pattern.Node;
 import pattern.Pattern;
+import pattern.Variable;
 
 public class GenericReducerTests {
 
@@ -52,6 +53,16 @@ public class GenericReducerTests {
     builder.add(new Rule(new Pattern(new Node(b)), new Pattern(c)));
     Reducer reducer = builder.build();
     expectEqual(reducer.reduce(new Node(a)), c);
+  }
+
+  public void testExtractInner() {
+    Variable v = new Variable("_");
+    builder.add(new Rule(new Pattern(new Node(v)), new Pattern(v)));
+    Reducer reducer = builder.build();
+    expectEqual(reducer.reduce(new Node(a)), a);
+    expectEqual(reducer.reduce(new Node(b)), b);
+    expectEqual(reducer.reduce(new Node(new Node(a, b))), new Node(a, b));
+    expectEqual(reducer.reduce(new Node(new Node(a))), a);
   }
 
   public void run() {

@@ -1,45 +1,35 @@
 package pattern.tester;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
-
 import pattern.*;
 
 public class Tester {
 
-  public static void main(String[] args) {
-    int tests = 0;
-    int successes = 0;
+  private static class MyTestContext implements TestContext {
+    private int successes;
+    private int tests;
 
-    Class[] classes = new Class[] {
+    public void addTestResult(String name, boolean success) {
+      tests++;
+      if(success) {
+        successes++;
+      }
+    }
+
+    String formatSummary() {
+      return "Tests: " + tests + ", Successes: " + successes + ", Failures: " + (tests - successes);
+    }
+  }
+
+  public static void main(String[] args) {
+    MyTestContext context = new MyTestContext();
+    TestRunner tests = Testers.classes(
       pattern.graph.GraphTest.class,
       pattern.PatternTest.class,
       pattern.reducer.SimpleReducerTest.class,
       pattern.ParserTest.class
-    };
+    );
 
-    for(Class cls : classes) {
-      for(Method m : cls.getMethods()) {
-        if(m.getName().startsWith("test")) {
-          try {
-            Object t = cls.newInstance();
-            try {
-              tests++;
-              m.invoke(t);
-              successes++;
-            } catch(IllegalAccessException e) {
-              e.printStackTrace();
-            } catch (InvocationTargetException e) {
-              e.getCause().printStackTrace();
-            }
-          } catch(InstantiationException e) {
-            e.printStackTrace();
-          } catch(IllegalAccessException e) {
-            e.printStackTrace();
-          }
-        }
-      }
-    }
-    System.out.println("Tests: " + tests + ", Successes: " + successes + ", Failures: " + (tests - successes));
+    tests.runTests(context);
+    System.out.println(context.formatSummary());
   }
 }

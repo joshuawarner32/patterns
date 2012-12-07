@@ -26,12 +26,66 @@ public class SimpleReducer implements Reducer {
     return new Builder(rules);
   }
 
+  private static boolean match(Value pat, Value value, Map<Variable, Value> context) {
+    if(pat.isAtomic()) {
+      if(pat instanceof Variable) {
+        Variable v = (Variable)pat;
+        Value prevMatch = context.get(v);
+        if(prevMatch == null) {
+          context.put(v, value);
+          return true;
+        } else {
+          return prevMatch.equals(value);
+        }
+      } else {
+        return value.equals(pat);
+      }
+    } else {
+      if(value.isAtomic()) {
+        return false;
+      } else {
+        if(value.size() != pat.size()) {
+          return false;
+        } else {
+          for(int i = 0; i < value.size(); i++) {
+            if(!match(pat.get(i), value.get(i), context)) {
+              return false;
+            }
+          }
+          return true;
+        }
+      }
+    }
+  }
+
+  private static Value replace(Value pat, Map<Variable, Value> context) {
+    if(pat.isAtomic()) {
+      if(pat instanceof Variable) {
+        Variable v = (Variable)pat;
+        Value prevMatch = context.get(v);
+        if(prevMatch == null) {
+          throw new IllegalStateException("variable " + v + " not defined");
+        } else {
+          return prevMatch;
+        }
+      } else {
+        return pat;
+      }
+    } else {
+      Value[] vals = new Value[pat.size()];
+      for(int i = 0; i < vals.length; i++) {
+        vals[i] = replace(pat.get(i), context);
+      }
+      return new Node(vals);
+    }
+  }
+
   private static boolean match(Pattern pat, Value value, Map<Variable, Value> context) {
-    return value.equals(pat.getNakedValue());
+    return match(pat.getNakedValue(), value, context);
   }
 
   private static Value replace(Pattern pat, Map<Variable, Value> context) {
-    return pat.getNakedValue();
+    return replace(pat.getNakedValue(), context);
   }
 
   private Value reduceChildren(Value value, Map<Variable, Value> context) {
