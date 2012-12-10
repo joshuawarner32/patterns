@@ -42,4 +42,8 @@
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
   </target>
+
+  <target name="run" depends="compile">
+    <java classpath="${build}/classes" classname="pattern.Main"/>
+  </target>
 </project>

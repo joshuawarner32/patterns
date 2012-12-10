@@ -3,6 +3,7 @@ package pattern;
 import java.util.Stack;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.EmptyStackException;
 
 public class Parser {
 
@@ -28,39 +29,43 @@ public class Parser {
   }
 
   public static Value parse(Namespace ns, String str) {
-    Context ctx = new Context();
-    ctx.push();
-    int i = 0;
-    while(i < str.length()) {
-      char ch = str.charAt(i);
+    try {
+      Context ctx = new Context();
+      ctx.push();
+      int i = 0;
+      while(i < str.length()) {
+        char ch = str.charAt(i);
 
-      if(Character.isWhitespace(ch)) {
-        while(Character.isWhitespace(ch)) {
-          i++;
-          if(i >= str.length()) {
-            break;
+        if(Character.isWhitespace(ch)) {
+          while(Character.isWhitespace(ch)) {
+            i++;
+            if(i >= str.length()) {
+              break;
+            }
+            ch = str.charAt(i);
           }
-          ch = str.charAt(i);
-        }
-      } else if(ch == '(') {
-        ctx.push();
-        i++;
-      } else if(ch == ')') {
-        ctx.add(ctx.pop());
-        i++;
-      } else {
-        int start = i;
-        while(isIdent(ch)) {
+        } else if(ch == '(') {
+          ctx.push();
           i++;
-          if(i >= str.length()) {
-            break;
+        } else if(ch == ')') {
+          ctx.add(ctx.pop());
+          i++;
+        } else {
+          int start = i;
+          while(isIdent(ch)) {
+            i++;
+            if(i >= str.length()) {
+              break;
+            }
+            ch = str.charAt(i);
           }
-          ch = str.charAt(i);
+          ctx.add(ns.symbol(str.substring(start, i)));
         }
-        ctx.add(ns.symbol(str.substring(start, i)));
       }
+      return ctx.pop().get(0);
+    } catch(EmptyStackException e) {
+      throw new ParseException("expecting end paren");
     }
-    return ctx.pop().get(0);
   }
 
 }
