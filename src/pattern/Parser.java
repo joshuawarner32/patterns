@@ -29,8 +29,8 @@ public class Parser {
   }
 
   public static Value parse(Namespace ns, String str) {
+    Context ctx = new Context();
     try {
-      Context ctx = new Context();
       ctx.push();
       int i = 0;
       while(i < str.length()) {
@@ -63,12 +63,12 @@ public class Parser {
         }
       }
     } catch(EmptyStackException e) {
-      throw new ParseException("expecting end paren");
+      throw new ParseException("mismatched parens");
     }
-      if(ctx.stack.size() != 1) {
-        throw new ParseException()
-      }
-      return ctx.pop().get(0);
+    if(ctx.stack.size() != 1) {
+      throw new ParseException("mismatched parens");
+    }
+    return ctx.pop().get(0);
   }
 
 }
