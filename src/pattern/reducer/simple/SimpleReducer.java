@@ -18,6 +18,10 @@ public class SimpleReducer implements Reducer {
 
   private List<Rule> rules;
 
+  public SimpleReducer() {
+    rules = new ArrayList<Rule>();
+  }
+
   private SimpleReducer(List<Rule> rules) {
     this.rules = new ArrayList<Rule>(rules);
   }

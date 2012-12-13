@@ -74,4 +74,5 @@ public class ClassTestRunner implements TestRunner {
       return new ClassTestRunner(cls);
     }
   };
+
 }
