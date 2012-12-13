@@ -62,10 +62,13 @@ public class Parser {
           ctx.add(ns.symbol(str.substring(start, i)));
         }
       }
-      return ctx.pop().get(0);
     } catch(EmptyStackException e) {
       throw new ParseException("expecting end paren");
     }
+      if(ctx.stack.size() != 1) {
+        throw new ParseException()
+      }
+      return ctx.pop().get(0);
   }
 
 }
