@@ -3,7 +3,7 @@ package pattern;
 import pattern.reducer.Reducer;
 import pattern.reducer.simple.SimpleReducer;
 
-public class Main {
+public class JavaMain {
 
   private static Reducer reducer = new SimpleReducer();
 
