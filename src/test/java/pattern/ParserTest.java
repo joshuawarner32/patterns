@@ -1,6 +1,7 @@
 package pattern;
 
-import static pattern.tester.Expect.*;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 public class ParserTest {
 
@@ -8,12 +9,14 @@ public class ParserTest {
 
   private Symbol a = ns.symbol("a");
 
+  @Test
   public void testEmptyNode() {
-    expectEqual(Parser.parse(ns, "()"), new Node());
+    assertEquals(new Node(), Parser.parse(ns, "()"));
   }
 
+  @Test
   public void testSymbol() {
-    expectEqual(Parser.parse(ns, "a"), a);
+    assertEquals(a, Parser.parse(ns, "a"));
   }
 
 }

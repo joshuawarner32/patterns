@@ -2,7 +2,7 @@ package pattern.graph;
 
 import pattern.Variable;
 
-abstract class Transition {
+abstract class Transition implements TransitionOrReduction {
 
   final Variable var;
 

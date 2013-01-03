@@ -13,6 +13,9 @@ public class Pattern {
   }
 
   public Pattern(Variable[] args, Value value) {
+    if(value == null) {
+      throw new NullPointerException();
+    }
     this.args = args;
     this.value = value;
   }

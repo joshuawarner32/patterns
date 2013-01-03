@@ -11,6 +11,12 @@ public class Rule {
   public final Pattern replace;
 
   public Rule(Pattern match, Pattern replace) {
+    if(match == null) {
+      throw new NullPointerException();
+    }
+    if(replace == null) {
+      throw new NullPointerException();
+    }
     this.match = match;
     this.replace = replace;
   }
