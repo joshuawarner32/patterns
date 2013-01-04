@@ -6,6 +6,9 @@
   <groupId>patterns</groupId>
   <version>0.0.1-SNAPSHOT</version>
   <artifactId>patterns</artifactId>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>asm</groupId>

@@ -1,5 +1,8 @@
 package pattern.reducer.graph;
 
+import java.util.Map;
+import java.util.HashMap;
+
 import pattern.Value;
 import pattern.Variable;
 import pattern.Pattern;
@@ -12,30 +15,29 @@ import pattern.reducer.ReducerBuilder;
 public class GraphReducer implements Reducer {
 
   private PersistentGraph<State, State> transitionGraph;
-  private PersistentGraph<State, Reduction> reductionGraph;
+  private Map<State, State> reductionGraph;
 
-  private State rootState;
-  private Variable rootVariable;
+  private static final Variable rootVariable = new Variable("_");
+  private static final State rootState = new State(rootVariable);
 
   public GraphReducer() {
-    graph = new PersistentGraph();
-    rootState = new State();
-    rootVariable = new Variable("_");
+    transitionGraph = new PersistentGraph<State, State>();
+    reductionGraph = new HashMap<State, State>();
   }
 
   private GraphReducer(Builder b) {
     transitionGraph = b.transitionGraphBuilder.build();
-    reductionGraph = b.reductionGraphBuilder.build();
+    reductionGraph = new HashMap<State, State>(b.reductionGraphBuilder);
   }
 
   public static class Builder implements ReducerBuilder {
 
   private PersistentGraph.Builder<State, State> transitionGraphBuilder;
-  private PersistentGraph.Builder<State, Reduction> reductionGraphBuilder;
+  private Map<State, State> reductionGraphBuilder;
 
     private Builder(GraphReducer g) {
       transitionGraphBuilder = g.transitionGraph.builder();
-      reductionGraphBuilder = g.reductionGraph.builder();
+      reductionGraphBuilder = new HashMap<State, State>(g.reductionGraph);
     }
 
     public Reducer build() {
@@ -43,19 +45,31 @@ public class GraphReducer implements Reducer {
     }
 
     public void add(Rule rule) {
-      // TODO: create GraphReducer where that's the only rule
-      // TODO: merge it in
+
+      // State initialState = new State(rule.match);
+      // State finalState = new State(rule.replace);
+
+
+    }
+  }
+
+  State reducedState(State s) {
+    State n = reductionGraph.get(s);
+    if(n == null) {
+      return s;
+    } {
+      return n;
     }
   }
 
   public Value reduce(Value val) {
-    Context ctx = new Context(rootState, rootVariable, val);
+    Context ctx = new Context(this, rootState, rootVariable, val);
 
-    return val;
+    return ctx.result();
   }
 
   public ReducerBuilder builder() {
-    return new Builder(graph);
+    return new Builder(this);
   }
 
 }

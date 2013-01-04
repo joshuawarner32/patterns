@@ -50,17 +50,17 @@ public class BinaryReducerTest {
     ReducerBuilder b = reducer.builder();
 
 
-    b.add(new Rule(new Pattern(new Node(and, true_, true_)), new Pattern(true_)));
-    b.add(new Rule(new Pattern(new Node(and, x, y)), new Pattern(false_)));
+    b.add(new Rule(new Node(and, true_, true_), true_));
+    b.add(new Rule(new Node(and, x, y), false_));
 
-    b.add(new Rule(new Pattern(new Node(or, false_, false_)), new Pattern(false_)));
-    b.add(new Rule(new Pattern(new Node(or, x, y)), new Pattern(true_)));
+    b.add(new Rule(new Node(or, false_, false_), false_));
+    b.add(new Rule(new Node(or, x, y), true_));
 
-    b.add(new Rule(new Pattern(new Node(xor, x, x)), new Pattern(false_)));
-    b.add(new Rule(new Pattern(new Node(xor, x, y)), new Pattern(true_)));
+    b.add(new Rule(new Node(xor, x, x), false_));
+    b.add(new Rule(new Node(xor, x, y), true_));
 
-    b.add(new Rule(new Pattern(new Node(not, true_)), new Pattern(false_)));
-    b.add(new Rule(new Pattern(new Node(not, false_)), new Pattern(true_)));
+    b.add(new Rule(new Node(not, true_), false_));
+    b.add(new Rule(new Node(not, false_), true_));
 
     return b.build();
   }

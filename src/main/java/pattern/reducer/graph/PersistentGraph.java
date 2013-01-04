@@ -6,78 +6,57 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import com.google.common.collect.SetMultimap;
-import com.google.common.collect.HashMultimap;
-
 public class PersistentGraph<N, E> {
 
-  private final Map<N, SetMultimap<E, N>> forwardEdges;
-  private final Map<N, SetMultimap<E, N>> backwardEdges;
+  private final Map<N, Map<E, N>> forwardEdges;
+  private final Map<N, Map<E, N>> backwardEdges;
 
   public PersistentGraph() {
-    forwardEdges = new HashMap<N, SetMultimap<E, N>>();
-    backwardEdges = new HashMap<N, SetMultimap<E, N>>();
+    forwardEdges = new HashMap<N, Map<E, N>>();
+    backwardEdges = new HashMap<N, Map<E, N>>();
   }
 
   private PersistentGraph(Builder<N, E> b) {
-    forwardEdges = new HashMap<N, SetMultimap<E, N>>(b.forwardEdges);
-    backwardEdges = new HashMap<N, SetMultimap<E, N>>(b.backwardEdges);
+    forwardEdges = new HashMap<N, Map<E, N>>(b.forwardEdges);
+    backwardEdges = new HashMap<N, Map<E, N>>(b.backwardEdges);
   }
 
   public static class Builder<N, E> {
-    private final Map<N, SetMultimap<E, N>> forwardEdges;
-    private final Map<N, SetMultimap<E, N>> backwardEdges;
+    private final Map<N, Map<E, N>> forwardEdges;
+    private final Map<N, Map<E, N>> backwardEdges;
 
     private Builder(PersistentGraph<N, E> g) {
-      forwardEdges = new HashMap<N, SetMultimap<E, N>>(g.forwardEdges);
-      backwardEdges = new HashMap<N, SetMultimap<E, N>>(g.backwardEdges);
+      forwardEdges = new HashMap<N, Map<E, N>>(g.forwardEdges);
+      backwardEdges = new HashMap<N, Map<E, N>>(g.backwardEdges);
     }
 
     private Builder() {
-      forwardEdges = new HashMap<N, SetMultimap<E, N>>();
-      backwardEdges = new HashMap<N, SetMultimap<E, N>>();
+      forwardEdges = new HashMap<N, Map<E, N>>();
+      backwardEdges = new HashMap<N, Map<E, N>>();
     }
 
     public PersistentGraph<N, E> build() {
       return new PersistentGraph<N, E>(this);
     }
 
-    private static <N, E> Set<N> getForUpdate(Map<N, SetMultimap<E, N>> map, N src, E edge) {
-      SetMultimap<E, N> m = map.get(src);
+    private static <N, E> void put(Map<N, Map<E, N>> map, N src, E edge, N target) {
+      Map<E, N> m = map.get(src);
       if(m == null) {
-        map.put(src, m = HashMultimap.create());
+        map.put(src, m = new HashMap<E, N>());
       }
-      return m.get(edge);
-    }
-
-    private static <N, E> void put(Map<N, SetMultimap<E, N>> map, N src, E edge, N target) {
-      Set<N> s = getForUpdate(map, src, edge);
-      s.add(target);
-    }
-
-    private static <N, E> void remove(Map<N, SetMultimap<E, N>> map, N src, E edge, N target) {
-      Set<N> s = getForUpdate(map, src, edge);
-      s.remove(target);
-      if(s.isEmpty()) {
-        map.remove(src);
-      }
+      m.put(edge, target);
     }
 
     public void add(N src, E edge, N target) {
       put(forwardEdges, src, edge, target);
       put(backwardEdges, target, edge, src);
     }
-
-    public void remove(N src, E edge, N target) {
-      remove(forwardEdges, src, edge, target);
-      remove(backwardEdges, target, edge, src);
-    }
   }
 
-  private static <N, E> Set<N> get(Map<N, SetMultimap<E, N>> map, N src, E edge) {
-    SetMultimap<E, N> m = map.get(src);
+  private static <N, E> N get(Map<N, Map<E, N>> map, N src, E edge) {
+    Map<E, N> m = map.get(src);
     if(m == null) {
-      return Collections.emptySet();
+      return null;
     }
     return m.get(edge);
   }
@@ -90,29 +69,12 @@ public class PersistentGraph<N, E> {
     return new Builder<N, E>();
   }
 
-  public Set<N> getTargets(N src, E edge) {
-    return Collections.unmodifiableSet(get(forwardEdges, src, edge));
+  public N getTarget(N src, E edge) {
+    return get(forwardEdges, src, edge);
   }
 
-  public Set<N> getSources(E edge, N dest) {
-    return Collections.unmodifiableSet(get(backwardEdges, dest, edge));
-  }
-
-  private static <T> T maybeFirst(Iterable<T> c) {
-    Iterator<T> it = c.iterator();
-    if(it.hasNext()) {
-      return it.next();
-    } else {
-      return null;
-    }
-  }
-
-  public N getAnyTarget(N src, E edge) {
-    return maybeFirst(get(forwardEdges, src, edge));
-  }
-
-  public N getAnySource(E edge, N dest) {
-    return maybeFirst(get(backwardEdges, dest, edge));
+  public N getSource(E edge, N dest) {
+    return get(backwardEdges, dest, edge);
   }
   
 }

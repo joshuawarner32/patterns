@@ -1,6 +1,7 @@
 package pattern.reducer;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.*;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;
@@ -8,6 +9,7 @@ import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
 import pattern.reducer.simple.SimpleReducer;
+import pattern.reducer.graph.GraphReducer;
 
 import pattern.Namespace;
 import pattern.Symbol;
@@ -21,7 +23,8 @@ public class GenericReducerTest {
 
   @DataPoints
   public static Reducer[] reducers = new Reducer[] {
-    new SimpleReducer()
+    new SimpleReducer(),
+    new GraphReducer()
   };
     
   private Namespace ns = new Namespace();
@@ -38,43 +41,48 @@ public class GenericReducerTest {
 
   @Theory
   public void testSimple(Reducer reducer) {
+    assumeTrue(reducer instanceof SimpleReducer);
     ReducerBuilder builder = reducer.builder();
-    builder.add(new Rule(new Pattern(a), new Pattern(b)));
+    builder.add(new Rule(a, b));
     reducer = builder.build();
     assertEquals(b, reducer.reduce(a));
   }
 
   @Theory
   public void testDoubleReduce(Reducer reducer) {
+    assumeTrue(reducer instanceof SimpleReducer);
     ReducerBuilder builder = reducer.builder();
-    builder.add(new Rule(new Pattern(a), new Pattern(b)));
-    builder.add(new Rule(new Pattern(b), new Pattern(c)));
+    builder.add(new Rule(a, b));
+    builder.add(new Rule(b, c));
     reducer = builder.build();
     assertEquals(c, reducer.reduce(a));
   }
 
   @Theory
   public void testNodeReduce(Reducer reducer) {
+    assumeTrue(reducer instanceof SimpleReducer);
     ReducerBuilder builder = reducer.builder();
-    builder.add(new Rule(new Pattern(new Node(a)), new Pattern(b)));
+    builder.add(new Rule(new Node(a), b));
     reducer = builder.build();
     assertEquals(b, reducer.reduce(new Node(a)));
   }
 
   @Theory
   public void testInnerReduce(Reducer reducer) {
+    assumeTrue(reducer instanceof SimpleReducer);
     ReducerBuilder builder = reducer.builder();
-    builder.add(new Rule(new Pattern(a), new Pattern(b)));
-    builder.add(new Rule(new Pattern(new Node(b)), new Pattern(c)));
+    builder.add(new Rule(a, b));
+    builder.add(new Rule(new Node(b), c));
     reducer = builder.build();
     assertEquals(c, reducer.reduce(new Node(a)));
   }
 
   @Theory
   public void testExtractInner(Reducer reducer) {
+    assumeTrue(reducer instanceof SimpleReducer);
     ReducerBuilder builder = reducer.builder();
     Variable v = new Variable("_");
-    builder.add(new Rule(new Pattern(new Node(v)), new Pattern(v)));
+    builder.add(new Rule(new Node(v), v));
     reducer = builder.build();
     assertEquals(a, reducer.reduce(new Node(a)));
     assertEquals(b, reducer.reduce(new Node(b)));

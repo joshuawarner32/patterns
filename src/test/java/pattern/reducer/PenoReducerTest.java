@@ -48,8 +48,8 @@ public class PenoReducerTest {
     ReducerBuilder b = reducer.builder();
 
 
-    b.add(new Rule(new Pattern(new Node(add, zero, x)), new Pattern(x)));
-    b.add(new Rule(new Pattern(new Node(add, new Node(succ, x), y)), new Pattern(new Node(add, x, new Node(succ, y)))));
+    b.add(new Rule(new Node(add, zero, x), x));
+    b.add(new Rule(new Node(add, new Node(succ, x), y), new Node(add, x, new Node(succ, y))));
 
     return b.build();
   }

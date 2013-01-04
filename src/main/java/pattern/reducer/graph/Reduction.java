@@ -1,6 +1,6 @@
 package pattern.reducer.graph;
 
-public class Reduction implements TransitionOrReduction {
+public class Reduction {
 
   private Reduction() {}
 

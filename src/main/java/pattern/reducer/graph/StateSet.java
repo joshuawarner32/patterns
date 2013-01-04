@@ -1,4 +1,4 @@
-package pattern.graph;
+package pattern.reducer.graph;
 
 import java.util.Set;
 

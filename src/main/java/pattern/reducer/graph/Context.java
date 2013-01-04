@@ -1,4 +1,4 @@
-package pattern.graph;
+package pattern.reducer.graph;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -6,22 +6,27 @@ import java.util.HashMap;
 import pattern.Variable;
 import pattern.Value;
 
-class Context {
+import pattern.Binding;
+
+class Context implements Binding {
 
   private State rootState;
   private Variable rootVariable;
 
+  private GraphReducer reducer;
+
   private State state;
   private Map<Variable, Expr> bindings = new HashMap<Variable, Expr>();
 
-  public Context(State state, Variable variable, Value value) {
+  public Context(GraphReducer reducer, State state, Variable variable, Value value) {
+    this.reducer = reducer;
     this.rootState = state;
     this.rootVariable = variable;
     this.state = state;
     bind(variable, new Expr(value));
   }
   
-  Expr get(Variable var) {
+  Expr getExpr(Variable var) {
     Expr ret = bindings.get(var);
     if(ret == null) {
       throw new IllegalStateException();
@@ -29,7 +34,15 @@ class Context {
     return ret;
   }
 
-  void bind(Variable var, Expr expr) {
+  public Value get(Variable var) {
+    return getExpr(var).toValue();
+  }
+
+  public Value getRawValue() {
+    return getExpr(rootVariable).toRawValue();
+  }
+
+  public void bind(Variable var, Expr expr) {
     if(bindings.put(var, expr) != null) {
       throw new IllegalStateException();
     }
@@ -42,31 +55,31 @@ class Context {
   }
 
   Context newChild(Value value) {
-    return new Context(rootState, rootVariable, value);
+    return new Context(reducer, rootState, rootVariable, value);
   }
 
   private boolean transition() {
-    for(Map.Entry<Variable, Expr> b : bindings.entrySet()) {
-      Variable var = b.getKey();
-      Expr expr = b.getValue();
+    // for(Map.Entry<Variable, Expr> b : bindings.entrySet()) {
+    //   Variable var = b.getKey();
+    //   Expr expr = b.getValue();
 
-      TransitionsForVariable ts = state.transitionsForVariable(var);
+    //   TransitionsForVariable ts = state.transitionsForVariable(var);
 
-      if(ts != null) {
-        expr.prepare(this);
-        State s = expr.partialReduce(this, ts);
-        if(s != state) {
-          state = s;
-          return true;
-        }
-      }
-    }
+    //   if(ts != null) {
+    //     expr.prepare(this);
+    //     State s = expr.partialReduce(this, ts);
+    //     if(s != state) {
+    //       state = s;
+    //       return true;
+    //     }
+    //   }
+    // }
     return false;
   }
 
   private boolean step() {
     while(transition()) {}
-    State ns = state.reduction();
+    State ns = reducer.reducedState(state);
     State old = state;
     state = ns;
     return ns != old;
@@ -78,6 +91,6 @@ class Context {
       // TODO: walk up transition tree
       throw new UnsupportedOperationException();
     }
-    return get(rootVariable).toValue();
+    return get(rootVariable);
   }
 }

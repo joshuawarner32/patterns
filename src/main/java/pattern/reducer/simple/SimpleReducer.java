@@ -10,6 +10,8 @@ import pattern.Variable;
 import pattern.Pattern;
 import pattern.Node;
 
+import pattern.MapBinding;
+
 import pattern.reducer.Rule;
 import pattern.reducer.Reducer;
 import pattern.reducer.ReducerBuilder;
@@ -30,69 +32,7 @@ public class SimpleReducer implements Reducer {
     return new Builder(rules);
   }
 
-  private static boolean match(Value pat, Value value, Map<Variable, Value> context) {
-    if(pat.isAtomic()) {
-      if(pat instanceof Variable) {
-        Variable v = (Variable)pat;
-        Value prevMatch = context.get(v);
-        if(prevMatch == null) {
-          context.put(v, value);
-          return true;
-        } else {
-          return prevMatch.equals(value);
-        }
-      } else {
-        return value.equals(pat);
-      }
-    } else {
-      if(value.isAtomic()) {
-        return false;
-      } else {
-        if(value.size() != pat.size()) {
-          return false;
-        } else {
-          for(int i = 0; i < value.size(); i++) {
-            if(!match(pat.get(i), value.get(i), context)) {
-              return false;
-            }
-          }
-          return true;
-        }
-      }
-    }
-  }
-
-  private static Value replace(Value pat, Map<Variable, Value> context) {
-    if(pat.isAtomic()) {
-      if(pat instanceof Variable) {
-        Variable v = (Variable)pat;
-        Value prevMatch = context.get(v);
-        if(prevMatch == null) {
-          throw new IllegalStateException("variable " + v + " not defined");
-        } else {
-          return prevMatch;
-        }
-      } else {
-        return pat;
-      }
-    } else {
-      Value[] vals = new Value[pat.size()];
-      for(int i = 0; i < vals.length; i++) {
-        vals[i] = replace(pat.get(i), context);
-      }
-      return new Node(vals);
-    }
-  }
-
-  private static boolean match(Pattern pat, Value value, Map<Variable, Value> context) {
-    return match(pat.getNakedValue(), value, context);
-  }
-
-  private static Value replace(Pattern pat, Map<Variable, Value> context) {
-    return replace(pat.getNakedValue(), context);
-  }
-
-  private Value reduceChildren(Value value, Map<Variable, Value> context) {
+  private Value reduceChildren(Value value, MapBinding binding) {
     if(!value.isAtomic()) {
       Value[] vs = new Value[value.size()];
       for(int i = 0; i < value.size(); i++) {
@@ -104,12 +44,12 @@ public class SimpleReducer implements Reducer {
     }
   }
 
-  private Value step(Value value, Map<Variable, Value> context) {
-    value = reduceChildren(value, context);
+  private Value step(Value value, MapBinding binding) {
+    value = reduceChildren(value, binding);
     for(Rule r : rules) {
-      if(match(r.match, value, context)) {
-        Value ret = replace(r.replace, context);
-        context.clear();
+      if(r.match(value, binding)) {
+        Value ret = r.replace(binding);
+        binding.clear();
         return ret;
       }
     }
@@ -117,11 +57,11 @@ public class SimpleReducer implements Reducer {
   }
 
   public Value reduce(Value value) {
-    Map<Variable, Value> context = new HashMap<Variable, Value>();
+    MapBinding binding = new MapBinding();
     Value v2 = value;
     do {
       value = v2;
-      v2 = step(value, context);
+      v2 = step(value, binding);
     } while(!v2.equals(value));
     return v2;
   }
