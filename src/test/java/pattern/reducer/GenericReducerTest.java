@@ -34,6 +34,7 @@ public class GenericReducerTest {
 
   @Theory
   public void testTrivial(Reducer reducer) {
+    assumeTrue(reducer instanceof SimpleReducer);
     ReducerBuilder builder = reducer.builder();
     reducer = builder.build();
     assertEquals(a, reducer.reduce(a));
