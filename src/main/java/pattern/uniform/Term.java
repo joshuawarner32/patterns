@@ -81,4 +81,8 @@ public class Term {
       return false;
     }
   }
+
+  public int hashCode() {
+    return head.hashCode() * 3 + Arrays.hashCode(items);
+  }
 }

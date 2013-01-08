@@ -70,4 +70,14 @@ public class UniformTest {
     Expression e = new Expression(f, g, a, b);
     assertEquals(f.term(g.term(a.self()), b.self()), e.toTerm());
   }
+
+  @Test
+  public void testExpressionMatches() {
+    Expression e = new Expression(f, g, a, b);
+    assertTrue(e.matches(new Expression(f, Expression.VAR, b)));
+    assertFalse(e.matches(new Expression(f, a, b)));
+    assertTrue(e.matches(new Expression(f, g, Expression.VAR, b)));
+    assertTrue(e.matches(new Expression(f, g, a, Expression.VAR)));
+    assertTrue(e.matches(new Expression(f, g, Expression.VAR, Expression.VAR)));
+  }
 }

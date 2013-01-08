@@ -57,4 +57,49 @@ public class Expression {
   public boolean equals(Object o) {
     return (o instanceof Expression) && Arrays.equals(((Expression)o).symbols, symbols);
   }
+
+  public int hashCode() {
+    return Arrays.hashCode(symbols);
+  }
+
+  public static final Symbol VAR = new Symbol("_", 0);
+
+  private static class Matcher {
+    private Symbol[] left;
+    private Symbol[] right;
+    private int ir = 0;
+    private int il = 0;
+
+    private Matcher(Symbol[] left, Symbol[] right) {
+      this.left = left;
+      this.right = right;
+    }
+
+    private void skipLeft() {
+      Symbol head = left[il++];
+      for(int i = 0; i < head.arity; i++) {
+        skipLeft();
+      }
+    }
+
+    private boolean match() {
+      while(true) {
+        if(il >= left.length || ir >= right.length) {
+          return true;
+        } else if(left[il] == right[ir]) {
+          il++;
+          ir++;
+        } else if(right[ir] == VAR) {
+          skipLeft();
+          ir++;
+        } else {
+          return false;
+        }
+      }
+    }
+  }
+
+  public boolean matches(Expression e) {
+    return new Matcher(symbols, e.symbols).match();
+  }
 }
