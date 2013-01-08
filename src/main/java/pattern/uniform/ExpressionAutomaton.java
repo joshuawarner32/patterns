@@ -1,5 +1,8 @@
 package pattern.uniform;
 
+import java.util.Map;
+import java.util.HashMap;
+
 public class ExpressionAutomaton {
 
   private static class State {
@@ -12,14 +15,16 @@ public class ExpressionAutomaton {
   public static class Builder {
 
     private Builder(ExpressionAutomaton a) {
-      
+
     }
 
     public void add(Expression e) {
 
     }
 
-    public ExpressionAutomaton build();
+    public ExpressionAutomaton build() {
+      return new ExpressionAutomaton();
+    }
   }
 
   public Builder builder() {
