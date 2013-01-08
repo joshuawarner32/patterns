@@ -6,7 +6,6 @@ public class Expression {
   private Symbol[] symbols;
 
   public Expression(Symbol... symbols) {
-    // TODO: validate
     this.symbols = Arrays.copyOf(symbols, symbols.length);
   }
 
@@ -65,27 +64,38 @@ public class Expression {
   public static final Symbol VAR = new Symbol("_", 0);
 
   private static class Matcher {
-    private Symbol[] left;
-    private Symbol[] right;
-    private int ir = 0;
-    private int il = 0;
+    protected Symbol[] left;
+    protected Symbol[] right;
+    protected int ir = 0;
+    protected int il = 0;
 
-    private Matcher(Symbol[] left, Symbol[] right) {
+    protected Matcher(Symbol[] left, Symbol[] right) {
       this.left = left;
       this.right = right;
     }
 
-    private void skipLeft() {
+    protected void skipLeft() {
       Symbol head = left[il++];
       for(int i = 0; i < head.arity; i++) {
         skipLeft();
       }
     }
 
-    private boolean match() {
+    protected void skipRight() {
+      Symbol head = right[ir++];
+      for(int i = 0; i < head.arity; i++) {
+        skipRight();
+      }
+    }
+
+    protected boolean match(boolean allowPrefixMatch) {
       while(true) {
-        if(il >= left.length || ir >= right.length) {
-          return true;
+        if(ir >= right.length) {
+          if(il >= left.length) {
+            return true;
+          } else {
+            return allowPrefixMatch;
+          }
         } else if(left[il] == right[ir]) {
           il++;
           ir++;
@@ -100,6 +110,117 @@ public class Expression {
   }
 
   public boolean matches(Expression e) {
-    return new Matcher(symbols, e.symbols).match();
+    return new Matcher(e.symbols, symbols).match(false);
+  }
+
+  public boolean prefixMatches(Expression e) {
+    return new Matcher(e.symbols, symbols).match(true);
+  }
+
+  private static class CommonMatcher extends Matcher {
+    private Symbol[] res;
+    private int iRes = 0;
+
+    private CommonMatcher(Symbol[] left, Symbol[] right) {
+      super(left, right);
+      res = new Symbol[Math.min(left.length, right.length)];
+    }
+
+    private Symbol[] common() {
+      while(true) {
+        if(il >= left.length || ir >= right.length) {
+          break;
+        } else if(left[il] == right[ir]) {
+          res[iRes++] = left[il];
+          il++;
+          ir++;
+        } else {
+          skipLeft();
+          skipRight();
+          res[iRes++] = VAR;
+        }
+      }
+      return Arrays.copyOf(res, iRes);
+    }
+
+  }
+
+  public Expression commonPattern(Expression e) {
+    return Expression.makeWithoutReallocate(new CommonMatcher(symbols, e.symbols).common());
+  }
+
+  private static class SuperMatcher extends Matcher {
+    private Symbol[] res;
+    private int iRes = 0;
+
+    private SuperMatcher(Symbol[] left, Symbol[] right) {
+      super(left, right);
+      res = new Symbol[left.length + right.length];
+    }
+
+    protected void readLeft() {
+      if(il < left.length) {
+        Symbol head = left[il++];
+        res[iRes++] = head;
+        for(int i = 0; i < head.arity; i++) {
+          readLeft();
+        }
+      } else {
+        res[iRes++] = VAR;
+      }
+    }
+
+    protected void readRight() {
+      if(ir < right.length) {
+        Symbol head = right[ir++];
+        res[iRes++] = head;
+        for(int i = 0; i < head.arity; i++) {
+          readRight();
+        }
+      } else {
+        res[iRes++] = VAR;
+      }
+    }
+
+    private Symbol[] super_() {
+      while(true) {
+        if(il >= left.length) {
+          if(ir >= right.length) {
+            return Arrays.copyOf(res, iRes);
+          } else {
+            res[iRes++] = right[ir++];
+          }
+        } else if(ir >= right.length) {
+          res[iRes++] = left[il++];
+        } else if(left[il] == right[ir]) {
+          res[iRes++] = left[il];
+          il++;
+          ir++;
+        } else if(left[il] == VAR) {
+          readRight();
+          il++;
+        } else if(right[il] == VAR) {
+          readLeft();
+          ir++;
+        } else {
+          return null;
+        }
+      }
+    }
+
+  }
+
+  public static final Expression TOP = makeWithoutReallocate(null);
+
+  public Expression superPattern(Expression e) {
+    if(this == TOP || e == TOP) {
+      return TOP;
+    }
+    Symbol[] res = new SuperMatcher(symbols, e.symbols).super_();
+    if(res == null) {
+      return TOP;
+    } else {
+      return makeWithoutReallocate(res);
+    }
   }
 }

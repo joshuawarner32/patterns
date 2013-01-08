@@ -74,10 +74,40 @@ public class UniformTest {
   @Test
   public void testExpressionMatches() {
     Expression e = new Expression(f, g, a, b);
-    assertTrue(e.matches(new Expression(f, Expression.VAR, b)));
-    assertFalse(e.matches(new Expression(f, a, b)));
-    assertTrue(e.matches(new Expression(f, g, Expression.VAR, b)));
-    assertTrue(e.matches(new Expression(f, g, a, Expression.VAR)));
-    assertTrue(e.matches(new Expression(f, g, Expression.VAR, Expression.VAR)));
+    assertTrue(new Expression(f, Expression.VAR, b).matches(e));
+    assertFalse(new Expression(f, a, b).matches(e));
+    assertTrue(new Expression(f, g, Expression.VAR, b).matches(e));
+    assertTrue(new Expression(f, g, a, Expression.VAR).matches(e));
+    assertTrue(new Expression(f, g, Expression.VAR, Expression.VAR).matches(e));
+    assertTrue(new Expression(Expression.VAR).matches(e));
+    assertFalse(new Expression(f, Expression.VAR).matches(e));
+  }
+
+  @Test
+  public void testExpressionPrefixMatches() {
+    Expression e = new Expression(f, g, a, b);
+    assertTrue(new Expression(f, Expression.VAR, b).prefixMatches(e));
+    assertFalse(new Expression(f, a, b).prefixMatches(e));
+    assertTrue(new Expression(f, g, Expression.VAR, b).prefixMatches(e));
+    assertTrue(new Expression(f, g, a, Expression.VAR).prefixMatches(e));
+    assertTrue(new Expression(f, g, Expression.VAR, Expression.VAR).prefixMatches(e));
+    assertTrue(new Expression(Expression.VAR).prefixMatches(e));
+
+    assertTrue(new Expression(f, Expression.VAR).prefixMatches(e));
+    assertTrue(new Expression(f, g, Expression.VAR).prefixMatches(e));
+  }
+
+  @Test
+  public void testCommonPattern() {
+    assertEquals(new Expression(f, Expression.VAR, b), new Expression(f, a, b).commonPattern(new Expression(f, g, a, b)));
+    assertEquals(new Expression(f, Expression.VAR, b), new Expression(f, a, b).commonPattern(new Expression(f, Expression.VAR, b)));
+  }
+
+  @Test
+  public void testSuperPattern() {
+    assertEquals(new Expression(f, g, Expression.VAR, b), new Expression(f, Expression.VAR, b).superPattern(new Expression(f, g)));
+    assertEquals(Expression.TOP, new Expression(a).superPattern(new Expression(b)));
+    assertEquals(Expression.TOP, Expression.TOP.superPattern(new Expression(b)));
+    assertEquals(Expression.TOP, new Expression(a).superPattern(Expression.TOP));
   }
 }
