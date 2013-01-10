@@ -38,6 +38,10 @@ public class Expression {
     return e;
   }
 
+  Symbol[] unsafeRawArray() {
+    return symbols;
+  }
+
   public String toString() {
     StringBuilder b = new StringBuilder();
 
